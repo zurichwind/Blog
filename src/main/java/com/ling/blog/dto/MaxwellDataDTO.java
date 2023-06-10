@@ -10,10 +10,9 @@ import java.util.Map;
 /**
  * maxwell监听数据
  *
- * @author yezhqiu
- * @date 2021/07/02
- * @since 1.0.0
- **/
+ * @Author : 风间离
+ * @create 2023/5/27 17:26
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

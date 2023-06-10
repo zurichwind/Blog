@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 /**
  * 评论数量dto
  *
- * @author yezhiqiu
- * @date 2022/01/23
+ * @Author : 风间离
+ * @create 2023/5/27 17:26
  */
 @Data
 @AllArgsConstructor

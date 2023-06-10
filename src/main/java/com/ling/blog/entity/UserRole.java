@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 /**
  * 用户角色
  *
- * @author yezhiqiu
- * @date 2021/07/29
+ * @Author : 风间离
+ * @create 2023/5/27 17:26
  */
 @Data
 @Builder

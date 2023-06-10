@@ -3,10 +3,9 @@ package com.ling.blog.constant;
 /**
  * 第三方登录参数常量
  *
- * @author yezhqiu
- * @date 2021/06/14
- * @since 1.0.0
- **/
+ * @Author : 风间离
+ * @create 2023/5/27 17:26
+ */
 public class SocialLoginConst {
 
     /**

@@ -6,8 +6,8 @@ import lombok.Getter;
 /**
  * 登录方式枚举
  *
- * @author yezhiqiu
- * @date 2021/07/28
+ * @Author : 风间离
+ * @create 2023/5/27 17:26
  */
 @Getter
 @AllArgsConstructor
