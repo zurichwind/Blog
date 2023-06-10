@@ -6,8 +6,8 @@ import lombok.Getter;
 /**
  * Markdown文章类型枚举
  *
- * @author linweiyuan
- * @date 2022/07/28
+ * @Author : 风间离
+ * @create 2023/5/27 17:26
  */
 @Getter
 @AllArgsConstructor

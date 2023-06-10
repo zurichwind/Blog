@@ -15,9 +15,8 @@ import java.util.List;
 /**
  * 用户角色vo
  *
- * @author xiaojie
- * @date 2021/08/03
- * @since 2020-05-18
+ * @Author : 风间离
+ * @create 2023/5/27 17:26
  */
 @Data
 @Builder

@@ -7,10 +7,9 @@ import java.util.Objects;
 /**
  * 分页工具类
  *
- * @author yezhqiu
- * @date 2021/07/18
- * @since 1.0.0
- **/
+ * @Author : 风间离
+ * @create 2023/5/27 17:26
+ */
 public class PageUtils {
 
     private static final ThreadLocal<Page<?>> PAGE_HOLDER = new ThreadLocal<>();

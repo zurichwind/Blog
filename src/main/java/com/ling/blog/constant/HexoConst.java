@@ -12,8 +12,8 @@ package com.ling.blog.constant;
  * ---
  * 正文
  *
- * @author linweiyuan
- * @date 2022/07/28
+ * @Author : 风间离
+ * @create 2023/5/27 17:26
  */
 public class HexoConst {
     /**

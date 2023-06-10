@@ -10,8 +10,8 @@ import static com.ling.blog.enums.StatusCodeEnum.SUCCESS;
 /**
  * 接口返回类
  *
- * @author yezhiqiu
- * @date 2021/08/10
+ * @Author : 风间离
+ * @create 2023/5/27 17:26
  */
 @Data
 public class Result<T> {
