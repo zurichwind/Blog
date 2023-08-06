@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-card">
       <div class="login-banner">
-        <!-- <img src="https://upload.linkstarted.top/cloudfile/anya.jpg" /> -->
+        <!-- <img src="https://cloud.zurish.cn/cloud/c66a437a100c57bcff26037f1db876f0.jpg" /> -->
       </div>
       <!-- 登录表单 -->
       <div class="login-form">
@@ -30,7 +30,7 @@
       </div>
     </div>
     <div class="footer">
-      Copyright © 2020-2022 MongoBlog-Admin by Roy
+      Copyright © 2020-2023 WindBlog-Admin by Wind
     </div>
   </div>
 </template>
@@ -56,11 +56,6 @@ export default {
     login(type) {
       const submit = () => {
         const that = this;
-        // eslint-disable-next-line no-undef
-        var captcha = new TencentCaptcha(
-          this.config.TENCENT_CAPTCHA,
-          function (res) {
-            if (res.ret === 0) {
               //发送登录请求
               let param = new URLSearchParams();
               param.append("username", type == 2 ? 'test@qq.com' : that.loginForm.username);
@@ -78,11 +73,6 @@ export default {
                 }
               });
             }
-          }
-        );
-        // 显示验证码
-        captcha.show();
-      }
       if (type == 2) {
         submit();
       } else {
@@ -118,7 +108,7 @@ export default {
   overflow: hidden;
   min-height: 500px;
   max-height: 550px;
-  background: url("https://upload.linkstarted.top/cloudfile/anya.jpg") center no-repeat;
+  background: url("https://cloud.zurish.cn/cloud/anya.jpg") center no-repeat;
   background-size: cover;
 
 }

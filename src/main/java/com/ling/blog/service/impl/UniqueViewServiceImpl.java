@@ -33,13 +33,13 @@ public class UniqueViewServiceImpl extends ServiceImpl<UniqueViewMapper, UniqueV
     @Autowired
     private RedisService redisService;
     @Autowired
-    private UniqueViewMapper uniqueViewDao;
+    private UniqueViewMapper uniqueViewMapper;
 
     @Override
     public List<UniqueViewDTO> listUniqueViews() {
         DateTime startTime = DateUtil.beginOfDay(DateUtil.offsetDay(new Date(), -7));
         DateTime endTime = DateUtil.endOfDay(new Date());
-        return uniqueViewDao.listUniqueViews(startTime, endTime);
+        return uniqueViewMapper.listUniqueViews(startTime, endTime);
     }
 
     @Scheduled(cron = " 0 0 0 * * ?", zone = "Asia/Shanghai")
@@ -51,7 +51,7 @@ public class UniqueViewServiceImpl extends ServiceImpl<UniqueViewMapper, UniqueV
                 .createTime(LocalDateTimeUtil.offset(LocalDateTime.now(ZoneId.of(ZoneEnum.SHANGHAI.getZone())), -1, ChronoUnit.DAYS))
                 .viewsCount(Optional.of(count.intValue()).orElse(0))
                 .build();
-        uniqueViewDao.insert(uniqueView);
+        uniqueViewMapper.insert(uniqueView);
     }
 
     @Scheduled(cron = " 0 1 0 * * ?", zone = "Asia/Shanghai")

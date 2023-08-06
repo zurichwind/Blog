@@ -34,9 +34,9 @@ import java.util.stream.Collectors;
 @Service
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
     @Autowired
-    private MenuMapper menuDao;
+    private MenuMapper menuMapper;
     @Autowired
-    private RoleMenuMapper roleMenuDao;
+    private RoleMenuMapper rolemenuMapper;
 
     /**
      * 查看菜单列表
@@ -47,7 +47,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public List<MenuDTO> listMenus(ConditionVO conditionVO) {
         // 查询菜单数据
-        List<Menu> menuList = menuDao.selectList(new LambdaQueryWrapper<Menu>()
+        List<Menu> menuList = menuMapper.selectList(new LambdaQueryWrapper<Menu>()
                 .like(StringUtils.isNotBlank(conditionVO.getKeywords()), Menu::getName, conditionVO.getKeywords()));
         // 获取目录列表
         List<Menu> catalogList = listCatalog(menuList);
@@ -87,26 +87,26 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public void deleteMenu(Integer menuId) {
         // 查询是否有角色关联
-        Integer count = Math.toIntExact(roleMenuDao.selectCount(new LambdaQueryWrapper<RoleMenu>()
+        Integer count = Math.toIntExact(rolemenuMapper.selectCount(new LambdaQueryWrapper<RoleMenu>()
                 .eq(RoleMenu::getMenuId, menuId)));
         if (count > 0) {
             throw new BizException("菜单下有角色关联");
         }
         // 查询子菜单
-        List<Integer> menuIdList = menuDao.selectList(new LambdaQueryWrapper<Menu>()
+        List<Integer> menuIdList = menuMapper.selectList(new LambdaQueryWrapper<Menu>()
                         .select(Menu::getId)
                         .eq(Menu::getParentId, menuId))
                 .stream()
                 .map(Menu::getId)
                 .collect(Collectors.toList());
         menuIdList.add(menuId);
-        menuDao.deleteBatchIds(menuIdList);
+        menuMapper.deleteBatchIds(menuIdList);
     }
 
     @Override
     public List<LabelOptionDTO> listMenuOptions() {
         // 查询菜单数据
-        List<Menu> menuList = menuDao.selectList(new LambdaQueryWrapper<Menu>()
+        List<Menu> menuList = menuMapper.selectList(new LambdaQueryWrapper<Menu>()
                 .select(Menu::getId, Menu::getName, Menu::getParentId, Menu::getOrderNum));
         // 获取目录列表
         List<Menu> catalogList = listCatalog(menuList);
@@ -137,7 +137,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public List<UserMenuDTO> listUserMenus() {
         // 查询用户菜单信息
-        List<Menu> menuList = menuDao.listMenusByUserInfoId(UserUtils.getLoginUser().getUserInfoId());
+        List<Menu> menuList = menuMapper.listMenusByUserInfoId(UserUtils.getLoginUser().getUserInfoId());
         // 获取目录列表
         List<Menu> catalogList = listCatalog(menuList);
         // 获取目录下的子菜单

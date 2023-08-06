@@ -4,6 +4,7 @@ import com.ling.blog.handler.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -42,10 +43,10 @@ public class WebSecurityConfig
         return new FilterInvocationSecurityMetadataSourceImpl();
     }
 
-   // @Bean
-   // public AccessDecisionManager accessDecisionManager() {
-    //    return new AccessDecisionManagerImpl();
-    //}
+    @Bean
+    public AccessDecisionManager accessDecisionManager() {
+        return new AccessDecisionManagerImpl();
+    }
 
     @Bean
     public SessionRegistry sessionRegistry() {
@@ -85,6 +86,8 @@ public class WebSecurityConfig
                 .logout()
                 .logoutUrl("/logout")
                 .logoutSuccessHandler(logoutSuccessHandler);
+
+
         // 配置路由权限信息
         http.authorizeRequests()
                 .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {

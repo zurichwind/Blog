@@ -5,8 +5,8 @@ import com.ling.blog.dto.ResourceRoleDTO;
 import com.ling.blog.dto.RoleDTO;
 import com.ling.blog.entity.Role;
 import com.ling.blog.vo.ConditionVO;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import java.util.List;
  * @Create 2023/6/7  16:29
  */
 
-@Repository
+@Mapper
 public interface RoleMapper extends BaseMapper<Role> {
 
     /**

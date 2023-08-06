@@ -124,17 +124,18 @@ const switchTab = (key: number) => {
   resetForm();
 };
 
-const sendValidCode = (username: string) => {
+const sendValidCode = async (username: string) => {
   // eslint-disable-next-line no-undef
   //@ts-ignore
-  let captcha = new TencentCaptcha(config.TENCENT_CAPTCHA, async () => {
-    countDown();
-    await sendCode(username)
-    message.success("发送成功")
-  });
+  //let captcha = new TencentCaptcha(config.TENCENT_CAPTCHA, async () => {
+  countDown();
+  await sendCode(username);
+  message.success("发送成功");
+  //}
+  //);
 
   //显示滑动验证码
-  captcha.show();
+  //captcha.show();
 };
 //验证码倒计时
 const countDown = () => {
@@ -179,8 +180,8 @@ const qqLogin = () => {
 const getResponse = async () => {
   //请求滑动验证码
   //@ts-ignore
-  var captcha = new TencentCaptcha(config.TENCENT_CAPTCHA, async (res: any) => {
-    if (res.ret === 0) {
+  //var captcha = new TencentCaptcha(config.TENCENT_CAPTCHA, async (res: any) => {
+   // if (res.ret === 0) {
       //登录
       if (state.currentTabIndex === 1) {
         let params: loginParams = {
@@ -215,10 +216,10 @@ const getResponse = async () => {
         state.currentTabIndex = 1
         message.success("修改成功");
       }
-    }
-  });
+    //}
+  //});
   // 显示滑动验证码
-  captcha.show();
+  //captcha.show();
 };
 //验证码规则
 let validateCode = async (_rule: any, value: any) => {
@@ -283,7 +284,7 @@ const rules = {
   width: 211px;
   height: 108px;
   /* 背景图片 */
-  background: url("https://upload.linkstarted.top/cloud/1c0a045d44d61609399c4b1a51ada0e6.png") no-repeat;
+  background: url("https://cloud.zurish.cn/cloud/1c0a045d44d61609399c4b1a51ada0e6.png") no-repeat;
   /* 绝对定位 */
   position: absolute;
   top: -100px;
@@ -334,7 +335,7 @@ const rules = {
   position: absolute;
   left: 20px;
   top: 40px;
-  background: url("https://upload.linkstarted.top/cloud/52c30e8b6c6180b7ad2317f51356f174.png") no-repeat;
+  background: url("https://cloud.zurish.cn/cloud/52c30e8b6c6180b7ad2317f51356f174.png") no-repeat;
   transform: rotate(-20deg);
   transition: 0.3s ease-out;
 }
@@ -361,7 +362,7 @@ const rules = {
     width: 250px;
     height: 400px;
     overflow: hidden;
-    background: url("https://upload.linkstarted.top/cloudfile/anya.jpg") center no-repeat;
+    background: url("https://cloud.zurish.cn/cloud/anya.jpg") center no-repeat;
     background-size: cover;
   }
 

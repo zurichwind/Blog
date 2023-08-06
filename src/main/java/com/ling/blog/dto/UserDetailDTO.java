@@ -131,18 +131,15 @@ public class UserDetailDTO implements UserDetails {
     private LocalDateTime lastLoginTime;
 
 
-    //@Override
-    public Collection<? extends GrantedAuthority> getAuthoritiess() {
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roleList.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
     }
 
     private Set<GrantedAuthority> authorities;
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
-    }
+
     @Override
     public String getPassword() {
         return this.password;

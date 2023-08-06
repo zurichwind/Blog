@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ling.blog.dto.TagBackDTO;
 import com.ling.blog.entity.Tag;
 import com.ling.blog.vo.ConditionVO;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * @Author : 风间离
  * @create 2023/5/27 18:36
  */
-@Repository
+@Mapper
 public interface TagMapper  extends BaseMapper<Tag> {
 
     /**

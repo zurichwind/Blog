@@ -39,32 +39,32 @@ import java.util.stream.Collectors;
 @Service
 public class BlogInfoServiceImpl implements BlogInfoService {
     @Autowired
-    private UserInfoMapper userInfoDao;
+    private UserInfoMapper userInfoMapper;
     @Autowired
-    private ArticleMapper articleDao;
+    private ArticleMapper articleMapper;
     @Autowired
-    private CategoryMapper categoryDao;
+    private CategoryMapper categoryMapper;
     @Autowired
-    private TagMapper tagDao;
+    private TagMapper tagMapper;
     @Autowired
     private UniqueViewService uniqueViewService;
     @Autowired
     private RedisService redisService;
     @Autowired
-    private WebsiteConfigMapper websiteConfigDao;
+    private WebsiteConfigMapper websiteConfigMapper;
     @Resource
     private HttpServletRequest request;
 
     @Override
     public BlogHomeInfoDTO getBlogHomeInfo() {
         // 查询文章数量
-        Integer articleCount = Math.toIntExact(articleDao.selectCount(new LambdaQueryWrapper<Article>()
+        Integer articleCount = Math.toIntExact(articleMapper.selectCount(new LambdaQueryWrapper<Article>()
                 .eq(Article::getStatus, ArticleStatusEnum.PUBLIC.getStatus())
                 .eq(Article::getIsDelete, CommonConst.FALSE)));
         // 查询分类数量
-        Integer categoryCount = Math.toIntExact(categoryDao.selectCount(null));
+        Integer categoryCount = Math.toIntExact(categoryMapper.selectCount(null));
         // 查询标签数量
-        Integer tagCount = Math.toIntExact(tagDao.selectCount(null));
+        Integer tagCount = Math.toIntExact(tagMapper.selectCount(null));
         // 查询访问量
         Object count = redisService.get(RedisPrefixConst.BLOG_VIEWS_COUNT);
         String viewsCount = Optional.ofNullable(count).orElse(0).toString();
@@ -86,18 +86,18 @@ public class BlogInfoServiceImpl implements BlogInfoService {
         Object count = redisService.get(RedisPrefixConst.BLOG_VIEWS_COUNT);
         Integer viewsCount = Integer.parseInt(Optional.ofNullable(count).orElse(0).toString());
         // 查询用户量
-        Integer userCount = Math.toIntExact(userInfoDao.selectCount(null));
+        Integer userCount = Math.toIntExact(userInfoMapper.selectCount(null));
         // 查询文章量
-        Integer articleCount = Math.toIntExact(articleDao.selectCount(new LambdaQueryWrapper<Article>()
+        Integer articleCount = Math.toIntExact(articleMapper.selectCount(new LambdaQueryWrapper<Article>()
                 .eq(Article::getIsDelete, CommonConst.FALSE)));
         // 查询一周用户量
         List<UniqueViewDTO> uniqueViewList = uniqueViewService.listUniqueViews();
         // 查询文章统计
-        List<ArticleStatisticsDTO> articleStatisticsList = articleDao.listArticleStatistics();
+        List<ArticleStatisticsDTO> articleStatisticsList = articleMapper.listArticleStatistics();
         // 查询分类数据
-        List<CategoryDTO> categoryDTOList = categoryDao.listCategoryDTO();
+        List<CategoryDTO> categoryDTOList = categoryMapper.listCategoryDTO();
         // 查询标签数据
-        List<TagDTO> tagDTOList = BeanCopyUtils.copyList(tagDao.selectList(null), TagDTO.class);
+        List<TagDTO> tagDTOList = BeanCopyUtils.copyList(tagMapper.selectList(null), TagDTO.class);
         // 查询redis访问量前五的文章
         Map<Object, Double> articleMap = redisService.zReverseRangeWithScore(RedisPrefixConst.ARTICLE_VIEWS_COUNT, 0, 4);
         BlogBackInfoDTO blogBackInfoDTO = BlogBackInfoDTO.builder()
@@ -124,7 +124,7 @@ public class BlogInfoServiceImpl implements BlogInfoService {
                 .id(1)
                 .config(JSON.toJSONString(websiteConfigVO))
                 .build();
-        websiteConfigDao.updateById(websiteConfig);
+        websiteConfigMapper.updateById(websiteConfig);
         // 删除缓存
         redisService.del(RedisPrefixConst.WEBSITE_CONFIG);
     }
@@ -138,7 +138,7 @@ public class BlogInfoServiceImpl implements BlogInfoService {
             websiteConfigVO = JSON.parseObject(websiteConfig.toString(), WebsiteConfigVO.class);
         } else {
             // 从数据库中加载
-            String config = websiteConfigDao.selectById(CommonConst.DEFAULT_CONFIG_ID).getConfig();
+            String config = websiteConfigMapper.selectById(CommonConst.DEFAULT_CONFIG_ID).getConfig();
             websiteConfigVO = JSON.parseObject(config, WebsiteConfigVO.class);
             redisService.set(RedisPrefixConst.WEBSITE_CONFIG, config);
         }
@@ -197,7 +197,7 @@ public class BlogInfoServiceImpl implements BlogInfoService {
         List<Integer> articleIdList = new ArrayList<>(articleMap.size());
         articleMap.forEach((key, value) -> articleIdList.add((Integer) key));
         // 查询文章信息
-        return articleDao.selectList(new LambdaQueryWrapper<Article>()
+        return articleMapper.selectList(new LambdaQueryWrapper<Article>()
                         .select(Article::getId, Article::getArticleTitle)
                         .in(Article::getId, articleIdList))
                 .stream().map(article -> ArticleRankDTO.builder()

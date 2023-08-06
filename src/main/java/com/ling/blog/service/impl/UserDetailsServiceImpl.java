@@ -37,17 +37,17 @@ import java.util.*;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
     @Autowired
-    private UserAuthMapper userAuthDao;
+    private UserAuthMapper userAuthMapper;
     @Autowired
-    private UserInfoMapper userInfoDao;
+    private UserInfoMapper userInfoMapper;
     @Autowired
-    private RoleMapper roleDao;
+    private RoleMapper roleMapper;
     @Autowired
     private RedisService redisService;
     @Resource
     private HttpServletRequest request;
     @Autowired
-    private ArticleMapper articleDao;
+    private ArticleMapper articleMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) {
@@ -55,7 +55,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new BizException("用户名不能为空！");
         }
         // 查询账号是否存在
-        UserAuth userAuth = userAuthDao.selectOne(new LambdaQueryWrapper<UserAuth>()
+        UserAuth userAuth = userAuthMapper.selectOne(new LambdaQueryWrapper<UserAuth>()
                 .select(UserAuth::getId, UserAuth::getUserInfoId, UserAuth::getUsername, UserAuth::getPassword, UserAuth::getLoginType)
                 .eq(UserAuth::getUsername, username));
         if (Objects.isNull(userAuth)) {
@@ -74,9 +74,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      */
     public UserDetailDTO convertUserDetail(UserAuth user, HttpServletRequest request) {
         // 查询账号信息
-        UserInfo userInfo = userInfoDao.selectById(user.getUserInfoId());
+        UserInfo userInfo = userInfoMapper.selectById(user.getUserInfoId());
         // 查询账号角色
-        List<String> roleList = roleDao.listRolesByUserInfoId(userInfo.getId());
+        List<String> roleList = roleMapper.listRolesByUserInfoId(userInfo.getId());
         // 查询账号点赞信息
         Set<Object> articleLikeSet = redisService.sMembers(RedisPrefixConst.ARTICLE_USER_LIKE + userInfo.getId());
         Set<Object> commentLikeSet = redisService.sMembers(RedisPrefixConst.COMMENT_USER_LIKE + userInfo.getId());
@@ -91,7 +91,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         for (Map.Entry<String,Object> entry : map.entrySet()) {
             Integer articleId = Integer.parseInt(entry.getKey());
             Integer newCommentsCount = (Integer)entry.getValue();
-            ArticleDTO article = articleDao.getArticleById(articleId);
+            ArticleDTO article = articleMapper.getArticleById(articleId);
             newCommentsList.add(NewCommentsVO.builder()
                     .id(articleId)
                     .articleTitle(article.getArticleTitle())

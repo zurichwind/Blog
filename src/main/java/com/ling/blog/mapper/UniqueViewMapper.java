@@ -3,8 +3,8 @@ package com.ling.blog.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ling.blog.dto.UniqueViewDTO;
 import com.ling.blog.entity.UniqueView;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
  * @Author : 风间离
  * @create 2023/5/27 17:55
  */
-@Repository
+@Mapper
 public interface UniqueViewMapper extends BaseMapper<UniqueView> {
 
     /**

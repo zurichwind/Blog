@@ -32,7 +32,7 @@ public class FilterInvocationSecurityMetadataSourceImpl implements FilterInvocat
     private static List<ResourceRoleDTO> resourceRoleList;
 
     @Autowired
-    private RoleMapper roleDao;
+    private RoleMapper roleMapper;
 
 
 
@@ -41,7 +41,7 @@ public class FilterInvocationSecurityMetadataSourceImpl implements FilterInvocat
      */
     //@PostConstruct
     private void loadDataSource() {
-        resourceRoleList = roleDao.listResourceRoles();
+        resourceRoleList = roleMapper.listResourceRoles();
     }
 
     /**

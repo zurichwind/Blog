@@ -1,7 +1,7 @@
 <template>
   <div class="footer-wrap">
     <div class="web-info">
-      © 2021 -
+      © 2023 -
       {{ new Date().getFullYear() }} By
       {{ pinia.blogInfo.websiteConfig.websiteAuthor }}
       <a href="https://beian.miit.gov.cn/" target="_blank">

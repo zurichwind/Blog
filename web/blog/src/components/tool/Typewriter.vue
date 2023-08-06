@@ -20,7 +20,7 @@ const typerOption = reactive({
 });
 // 初始化
 const init = () => {
-  document.title = "mongo-blog";
+  document.title = "Wind-blog";
   // 一言Api进行打字机循环输出效果
   fetch("https://v1.hitokoto.cn?c=i")
     .then((res) => {

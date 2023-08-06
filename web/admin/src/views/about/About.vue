@@ -1,4 +1,5 @@
 <template>
+
   <el-card class="main-card">
     <div class="title">{{ this.$route.name }}</div>
     <mavon-editor
@@ -15,6 +16,8 @@
     >
       修改
     </el-button>
+
+    <h3 class="text-center" style="margin-top: 50px">一个后端小白</h3>
   </el-card>
 </template>
 

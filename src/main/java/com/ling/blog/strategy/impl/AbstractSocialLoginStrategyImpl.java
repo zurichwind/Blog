@@ -41,11 +41,11 @@ import java.util.Objects;
 @Service
 public abstract class AbstractSocialLoginStrategyImpl implements SocialLoginStrategy {
     @Autowired
-    private UserAuthMapper userAuthDao;
+    private UserAuthMapper userAuthMapper;
     @Autowired
-    private UserInfoMapper userInfoDao;
+    private UserInfoMapper userInfoMapper;
     @Autowired
-    private UserRoleMapper userRoleDao;
+    private UserRoleMapper userroleMapper;
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
     @Resource
@@ -74,7 +74,7 @@ public abstract class AbstractSocialLoginStrategyImpl implements SocialLoginStra
             throw new BizException("账号已被禁用");
         }
         // 将登录信息放入springSecurity管理
-        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetailDTO, null, userDetailDTO.getAuthoritiess());
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetailDTO, null, userDetailDTO.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
         // 返回用户信息
         return BeanCopyUtils.copyObject(userDetailDTO, UserInfoDTO.class);
@@ -102,7 +102,7 @@ public abstract class AbstractSocialLoginStrategyImpl implements SocialLoginStra
      * @return {@link UserAuth} 用户账号
      */
     private UserAuth getUserAuth(SocialTokenDTO socialTokenDTO) {
-        return userAuthDao.selectOne(new LambdaQueryWrapper<UserAuth>()
+        return userAuthMapper.selectOne(new LambdaQueryWrapper<UserAuth>()
                 .eq(UserAuth::getUsername, socialTokenDTO.getOpenId())
                 .eq(UserAuth::getLoginType, socialTokenDTO.getLoginType()));
     }
@@ -117,7 +117,7 @@ public abstract class AbstractSocialLoginStrategyImpl implements SocialLoginStra
      */
     private UserDetailDTO getUserDetail(UserAuth user, String ipAddress, String ipSource) {
         // 更新登录信息
-        userAuthDao.update(new UserAuth(), new LambdaUpdateWrapper<UserAuth>()
+        userAuthMapper.update(new UserAuth(), new LambdaUpdateWrapper<UserAuth>()
                 .set(UserAuth::getLastLoginTime, LocalDateTime.now())
                 .set(UserAuth::getIpAddress, ipAddress)
                 .set(UserAuth::getIpSource, ipSource)
@@ -143,7 +143,7 @@ public abstract class AbstractSocialLoginStrategyImpl implements SocialLoginStra
                 .nickname(socialUserInfo.getNickname())
                 .avatar(socialUserInfo.getAvatar())
                 .build();
-        userInfoDao.insert(userInfo);
+        userInfoMapper.insert(userInfo);
         // 保存账号信息
         UserAuth userAuth = UserAuth.builder()
                 .userInfoId(userInfo.getId())
@@ -154,15 +154,15 @@ public abstract class AbstractSocialLoginStrategyImpl implements SocialLoginStra
                 .ipAddress(ipAddress)
                 .ipSource(ipSource)
                 .build();
-        userAuthDao.insert(userAuth);
+        userAuthMapper.insert(userAuth);
         // 绑定角色
         UserRole userRole = UserRole.builder()
                 .userId(userInfo.getId())
                 .roleId(RoleEnum.USER.getRoleId())
                 .build();
-        userRoleDao.insert(userRole);
-        //return userDetailsService.convertUserDetail(userAuth, request);
-        return null;
+        userroleMapper.insert(userRole);
+        return userDetailsService.convertUserDetail(userAuth, request);
+        //return null;
     }
 
 }

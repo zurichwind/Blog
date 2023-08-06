@@ -35,9 +35,9 @@ import java.util.stream.Collectors;
 @Service
 public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> implements ResourceService {
     @Autowired
-    private ResourceMapper resourceDao;
+    private ResourceMapper resourceMapper;
     @Autowired
-    private RoleResourceMapper roleResourceDao;
+    private RoleResourceMapper roleresourceMapper;
     @Autowired
     private FilterInvocationSecurityMetadataSourceImpl filterInvocationSecurityMetadataSource;
 
@@ -54,26 +54,26 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     @Override
     public void deleteResource(Integer resourceId) {
         // 查询是否有角色关联
-        Integer count = Math.toIntExact(roleResourceDao.selectCount(new LambdaQueryWrapper<RoleResource>()
+        Integer count = Math.toIntExact(roleresourceMapper.selectCount(new LambdaQueryWrapper<RoleResource>()
                 .eq(RoleResource::getResourceId, resourceId)));
         if (count > 0) {
             throw new BizException("该资源下存在角色");
         }
         // 删除子资源
-        List<Integer> resourceIdList = resourceDao.selectList(new LambdaQueryWrapper<Resource>()
+        List<Integer> resourceIdList = resourceMapper.selectList(new LambdaQueryWrapper<Resource>()
                         .select(Resource::getId).
                         eq(Resource::getParentId, resourceId))
                 .stream()
                 .map(Resource::getId)
                 .collect(Collectors.toList());
         resourceIdList.add(resourceId);
-        resourceDao.deleteBatchIds(resourceIdList);
+        resourceMapper.deleteBatchIds(resourceIdList);
     }
 
     @Override
     public List<ResourceDTO> listResources(ConditionVO conditionVO) {
         // 查询资源列表
-        List<Resource> resourceList = resourceDao.selectList(new LambdaQueryWrapper<Resource>()
+        List<Resource> resourceList = resourceMapper.selectList(new LambdaQueryWrapper<Resource>()
                 .like(StringUtils.isNotBlank(conditionVO.getKeywords()), Resource::getResourceName, conditionVO.getKeywords()));
         // 获取所有模块
         List<Resource> parentList = listResourceModule(resourceList);
@@ -102,7 +102,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     @Override
     public List<LabelOptionDTO> listResourceOption() {
         // 查询资源列表
-        List<Resource> resourceList = resourceDao.selectList(new LambdaQueryWrapper<Resource>()
+        List<Resource> resourceList = resourceMapper.selectList(new LambdaQueryWrapper<Resource>()
                 .select(Resource::getId, Resource::getResourceName, Resource::getParentId)
                 .eq(Resource::getIsAnonymous, CommonConst.FALSE));
         // 获取所有模块

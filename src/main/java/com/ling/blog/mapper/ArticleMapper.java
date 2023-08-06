@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ling.blog.dto.*;
 import com.ling.blog.entity.Article;
 import com.ling.blog.vo.ConditionVO;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * @Create 2023/6/7  16:31
  */
 
-@Repository
+@Mapper
 public interface ArticleMapper extends BaseMapper<Article> {
 
     /**

@@ -2,7 +2,7 @@ package com.ling.blog.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ling.blog.entity.Menu;
-import org.springframework.stereotype.Repository;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
  * @Author : 风间离
  * @create 2023/5/27 18:41
  */
-@Repository
+@Mapper
 public interface MenuMapper extends BaseMapper<Menu> {
 
     /**

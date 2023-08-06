@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements UserInfoService {
     @Autowired
-    private UserInfoMapper userInfoDao;
+    private UserInfoMapper userInfoMapper;
     @Autowired
     private UserRoleService userRoleService;
     @Autowired(required = false)
@@ -61,7 +61,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 .intro(userInfoVO.getIntro())
                 .webSite(userInfoVO.getWebSite())
                 .build();
-        userInfoDao.updateById(userInfo);
+        userInfoMapper.updateById(userInfo);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -74,7 +74,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 .id(UserUtils.getLoginUser().getUserInfoId())
                 .avatar(avatar)
                 .build();
-        userInfoDao.updateById(userInfo);
+        userInfoMapper.updateById(userInfo);
         return avatar;
     }
 
@@ -88,7 +88,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 .id(UserUtils.getLoginUser().getUserInfoId())
                 .email(emailVO.getEmail())
                 .build();
-        userInfoDao.updateById(userInfo);
+        userInfoMapper.updateById(userInfo);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -99,7 +99,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 .id(userRoleVO.getUserInfoId())
                 .nickname(userRoleVO.getNickname())
                 .build();
-        userInfoDao.updateById(userInfo);
+        userInfoMapper.updateById(userInfo);
         // 删除用户角色重新添加
         userRoleService.remove(new LambdaQueryWrapper<UserRole>()
                 .eq(UserRole::getUserId, userRoleVO.getUserInfoId()));
@@ -120,7 +120,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
                 .id(userDisableVO.getId())
                 .isDisable(userDisableVO.getIsDisable())
                 .build();
-        userInfoDao.updateById(userInfo);
+        userInfoMapper.updateById(userInfo);
     }
 
     //@Override

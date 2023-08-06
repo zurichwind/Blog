@@ -33,32 +33,32 @@ import java.util.Objects;
 @Service
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
     @Autowired
-    private CategoryMapper categoryDao;
+    private CategoryMapper categoryMapper;
     @Autowired
-    private ArticleMapper articleDao;
+    private ArticleMapper articleMapper;
 
     @Override
     public PageResult<CategoryDTO> listCategories() {
-        return new PageResult<>(categoryDao.listCategoryDTO(), Math.toIntExact(categoryDao.selectCount(null)));
+        return new PageResult<>(categoryMapper.listCategoryDTO(), Math.toIntExact(categoryMapper.selectCount(null)));
     }
 
     @Override
     public PageResult<CategoryBackDTO> listBackCategories(ConditionVO condition) {
         // 查询分类数量
-        Integer count = Math.toIntExact(categoryDao.selectCount(new LambdaQueryWrapper<Category>()
+        Integer count = Math.toIntExact(categoryMapper.selectCount(new LambdaQueryWrapper<Category>()
                 .like(StringUtils.isNotBlank(condition.getKeywords()), Category::getCategoryName, condition.getKeywords())));
         if (count == 0) {
             return new PageResult<>();
         }
         // 分页查询分类列表
-        List<CategoryBackDTO> categoryList = categoryDao.listCategoryBackDTO(PageUtils.getLimitCurrent(), PageUtils.getSize(), condition);
+        List<CategoryBackDTO> categoryList = categoryMapper.listCategoryBackDTO(PageUtils.getLimitCurrent(), PageUtils.getSize(), condition);
         return new PageResult<>(categoryList, count);
     }
 
     @Override
     public List<CategoryOptionDTO> listCategoriesBySearch(ConditionVO condition) {
         // 搜索分类
-        List<Category> categoryList = categoryDao.selectList(new LambdaQueryWrapper<Category>()
+        List<Category> categoryList = categoryMapper.selectList(new LambdaQueryWrapper<Category>()
                 .like(StringUtils.isNotBlank(condition.getKeywords()), Category::getCategoryName, condition.getKeywords())
                 .orderByDesc(Category::getId));
         return BeanCopyUtils.copyList(categoryList, CategoryOptionDTO.class);
@@ -67,18 +67,18 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Override
     public void deleteCategory(List<Integer> categoryIdList) {
         // 查询分类id下是否有文章
-        Integer count = Math.toIntExact(articleDao.selectCount(new LambdaQueryWrapper<Article>()
+        Integer count = Math.toIntExact(articleMapper.selectCount(new LambdaQueryWrapper<Article>()
                 .in(Article::getCategoryId, categoryIdList)));
         if (count > 0) {
             throw new BizException("删除失败，该分类下存在文章");
         }
-        categoryDao.deleteBatchIds(categoryIdList);
+        categoryMapper.deleteBatchIds(categoryIdList);
     }
 
     @Override
     public void saveOrUpdateCategory(CategoryVO categoryVO) {
         // 判断分类名重复
-        Category existCategory = categoryDao.selectOne(new LambdaQueryWrapper<Category>()
+        Category existCategory = categoryMapper.selectOne(new LambdaQueryWrapper<Category>()
                 .select(Category::getId)
                 .eq(Category::getCategoryName, categoryVO.getCategoryName()));
         if (Objects.nonNull(existCategory) && !existCategory.getId().equals(categoryVO.getId())) {

@@ -31,7 +31,7 @@ import static com.ling.blog.constant.CommonConst.APPLICATION_JSON;
 @Component
 public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler {
     @Autowired
-    private UserAuthMapper userAuthDao;
+    private UserAuthMapper userAuthMapper;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException {
@@ -57,7 +57,7 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
                 .ipSource(UserUtils.getLoginUser().getIpSource())
                 .lastLoginTime(UserUtils.getLoginUser().getLastLoginTime())
                 .build();
-        userAuthDao.updateById(userAuth);
+        userAuthMapper.updateById(userAuth);
     }
 
 }

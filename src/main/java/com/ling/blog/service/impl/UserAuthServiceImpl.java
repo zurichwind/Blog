@@ -29,6 +29,7 @@ import com.ling.blog.service.UserAuthService;
 import com.ling.blog.strategy.context.SocialLoginStrategyContext;
 import com.ling.blog.utils.CommonUtils;
 import com.ling.blog.utils.PageUtils;
+import com.ling.blog.utils.SendMailUtils;
 import com.ling.blog.utils.UserUtils;
 import com.ling.blog.vo.*;
 import lombok.extern.slf4j.Slf4j;
@@ -59,11 +60,11 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
     @Autowired
     private RedisService redisService;
     @Autowired
-    private UserAuthMapper userAuthDao;
+    private UserAuthMapper userAuthMapper;
     @Autowired
-    private UserRoleMapper userRoleDao;
+    private UserRoleMapper userroleMapper;
     @Autowired
-    private UserInfoMapper userInfoDao;
+    private UserInfoMapper userInfoMapper;
     @Autowired
     private BlogInfoService blogInfoService;
     @Autowired
@@ -71,6 +72,8 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
     @Autowired
     private SocialLoginStrategyContext socialLoginStrategyContext;
 
+    @Autowired
+    private SendMailUtils mailUtils;
     @Override
     public void sendCode(String username) {
         // 校验账号是否合法
@@ -86,6 +89,7 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
                 .content("您的验证码为 " + code + " 有效期15分钟，请不要告诉他人哦！")
                 .build();
         log.info("验证码是" + code);
+        mailUtils.sendValidateEmail(username,code);
         rabbitTemplate.convertAndSend(MQPrefixConst.EMAIL_EXCHANGE, "*", new Message(JSON.toJSONBytes(emailDTO), new MessageProperties()));
         // 将验证码存入redis，设置过期时间为15分钟
         redisService.set(RedisPrefixConst.USER_CODE_KEY + username, code, RedisPrefixConst.CODE_EXPIRE_TIME);
@@ -133,13 +137,13 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
                 .nickname(CommonConst.DEFAULT_NICKNAME + IdWorker.getId())
                 .avatar(blogInfoService.getWebsiteConfig().getUserAvatar())
                 .build();
-        userInfoDao.insert(userInfo);
+        userInfoMapper.insert(userInfo);
         // 绑定用户角色
         UserRole userRole = UserRole.builder()
                 .userId(userInfo.getId())
                 .roleId(RoleEnum.USER.getRoleId())
                 .build();
-        userRoleDao.insert(userRole);
+        userroleMapper.insert(userRole);
         // 新增用户账号
         UserAuth userAuth = UserAuth.builder()
                 .userInfoId(userInfo.getId())
@@ -147,7 +151,7 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
                 .password(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()))
                 .loginType(LoginTypeEnum.EMAIL.getType())
                 .build();
-        userAuthDao.insert(userAuth);
+        userAuthMapper.insert(userAuth);
     }
 
     @Override
@@ -157,7 +161,7 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
             throw new BizException("邮箱尚未注册！");
         }
         // 根据用户名修改密码
-        userAuthDao.update(new UserAuth(), new LambdaUpdateWrapper<UserAuth>()
+        userAuthMapper.update(new UserAuth(), new LambdaUpdateWrapper<UserAuth>()
                 .set(UserAuth::getPassword, BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()))
                 .eq(UserAuth::getUsername, user.getUsername()));
     }
@@ -165,7 +169,7 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
     @Override
     public void updateAdminPassword(PasswordVO passwordVO) {
         // 查询旧密码是否正确
-        UserAuth user = userAuthDao.selectOne(new LambdaQueryWrapper<UserAuth>()
+        UserAuth user = userAuthMapper.selectOne(new LambdaQueryWrapper<UserAuth>()
                 .eq(UserAuth::getId, UserUtils.getLoginUser().getId()));
         // 正确则修改密码，错误则提示不正确
         if (Objects.nonNull(user) && BCrypt.checkpw(passwordVO.getOldPassword(), user.getPassword())) {
@@ -173,7 +177,7 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
                     .id(UserUtils.getLoginUser().getId())
                     .password(BCrypt.hashpw(passwordVO.getNewPassword(), BCrypt.gensalt()))
                     .build();
-            userAuthDao.updateById(userAuth);
+            userAuthMapper.updateById(userAuth);
         } else {
             throw new BizException("旧密码不正确");
         }
@@ -182,12 +186,12 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
     @Override
     public PageResult<UserBackDTO> listUserBackDTO(ConditionVO condition) {
         // 获取后台用户数量
-        Integer count = userAuthDao.countUser(condition);
+        Integer count = userAuthMapper.countUser(condition);
         if (count == 0) {
             return new PageResult<>();
         }
         // 获取后台用户列表
-        List<UserBackDTO> userBackDTOList = userAuthDao.listUsers(PageUtils.getLimitCurrent(), PageUtils.getSize(), condition);
+        List<UserBackDTO> userBackDTOList = userAuthMapper.listUsers(PageUtils.getLimitCurrent(), PageUtils.getSize(), condition);
         return new PageResult<>(userBackDTOList, count);
     }
 
@@ -214,7 +218,7 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
             throw new BizException("验证码错误！");
         }
         //查询用户名是否存在
-        UserAuth userAuth = userAuthDao.selectOne(new LambdaQueryWrapper<UserAuth>()
+        UserAuth userAuth = userAuthMapper.selectOne(new LambdaQueryWrapper<UserAuth>()
                 .select(UserAuth::getUsername)
                 .eq(UserAuth::getUsername, user.getUsername()));
         return Objects.nonNull(userAuth);
@@ -226,7 +230,7 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
     @Scheduled(cron = "0 0 * * * ?")
     public void statisticalUserArea() {
         // 统计用户地域分布
-        Map<String, Long> userAreaMap = userAuthDao.selectList(new LambdaQueryWrapper<UserAuth>().select(UserAuth::getIpSource))
+        Map<String, Long> userAreaMap = userAuthMapper.selectList(new LambdaQueryWrapper<UserAuth>().select(UserAuth::getIpSource))
                 .stream()
                 .map(item -> {
                     if (StringUtils.isNotBlank(item.getIpSource())) {

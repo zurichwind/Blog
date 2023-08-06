@@ -45,13 +45,13 @@ import java.util.stream.Collectors;
 @Service
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
     @Autowired
-    private CommentMapper commentDao;
+    private CommentMapper commentMapper;
     @Autowired
-    private ArticleMapper articleDao;
+    private ArticleMapper articleMapper;
     @Autowired
     private RedisService redisService;
     @Autowired
-    private UserInfoMapper userInfoDao;
+    private UserInfoMapper userInfoMapper;
     @Autowired
     private RabbitTemplate rabbitTemplate;
     @Autowired
@@ -66,7 +66,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     @Override
     public PageResult<CommentDTO> listComments(CommentVO commentVO) {
         // 查询评论量
-        Integer commentCount = Math.toIntExact(commentDao.selectCount(new LambdaQueryWrapper<Comment>()
+        Integer commentCount = Math.toIntExact(commentMapper.selectCount(new LambdaQueryWrapper<Comment>()
                 .eq(Objects.nonNull(commentVO.getTopicId()), Comment::getTopicId, commentVO.getTopicId())
                 .eq(Comment::getType, commentVO.getType())
                 .isNull(Comment::getParentId)
@@ -75,7 +75,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             return new PageResult<>();
         }
         // 分页查询评论数据
-        List<CommentDTO> commentDTOList = commentDao.listComments(PageUtils.getLimitCurrent(), PageUtils.getSize(), commentVO);
+        List<CommentDTO> commentDTOList = commentMapper.listComments(PageUtils.getLimitCurrent(), PageUtils.getSize(), commentVO);
         if (CollectionUtils.isEmpty(commentDTOList)) {
             return new PageResult<>();
         }
@@ -86,14 +86,14 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 .map(CommentDTO::getId)
                 .collect(Collectors.toList());
         // 根据评论id集合查询回复数据
-        List<ReplyDTO> replyDTOList = commentDao.listReplies(commentIdList);
+        List<ReplyDTO> replyDTOList = commentMapper.listReplies(commentIdList);
         // 封装回复点赞量
         replyDTOList.forEach(item -> item.setLikeCount((Integer) likeCountMap.get(item.getId().toString())));
         // 根据评论id分组回复数据
         Map<Integer, List<ReplyDTO>> replyMap = replyDTOList.stream()
                 .collect(Collectors.groupingBy(ReplyDTO::getParentId));
         // 根据评论id查询回复量
-        Map<Integer, Integer> replyCountMap = commentDao.listReplyCountByCommentId(commentIdList)
+        Map<Integer, Integer> replyCountMap = commentMapper.listReplyCountByCommentId(commentIdList)
                 .stream().collect(Collectors.toMap(ReplyCountDTO::getCommentId, ReplyCountDTO::getReplyCount));
         // 封装评论数据
         commentDTOList.forEach(item -> {
@@ -107,7 +107,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     @Override
     public List<ReplyDTO> listRepliesByCommentId(Integer commentId) {
         // 转换页码查询评论下的回复
-        List<ReplyDTO> replyDTOList = commentDao.listRepliesByCommentId(PageUtils.getLimitCurrent(), PageUtils.getSize(), commentId);
+        List<ReplyDTO> replyDTOList = commentMapper.listRepliesByCommentId(PageUtils.getLimitCurrent(), PageUtils.getSize(), commentId);
         // 查询redis的评论点赞数据
         Map<String, Object> likeCountMap = redisService.hGetAll(RedisPrefixConst.COMMENT_LIKE_COUNT);
         // 封装点赞数据
@@ -136,7 +136,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 .type(commentVO.getType())
                 .isReview(isReview == CommonConst.TRUE ? CommonConst.FALSE : CommonConst.TRUE)
                 .build();
-        commentDao.insert(comment);
+        commentMapper.insert(comment);
         // 判断是否开启邮箱通知,通知用户
         if (websiteConfig.getIsEmailNotice().equals(CommonConst.TRUE)) {
             CompletableFuture.runAsync(() -> notice(comment));
@@ -174,12 +174,12 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     @Override
     public PageResult<CommentBackDTO> listCommentBackDTO(ConditionVO condition) {
         // 统计后台评论量
-        Integer count = commentDao.countCommentDTO(condition);
+        Integer count = commentMapper.countCommentDTO(condition);
         if (count == 0) {
             return new PageResult<>();
         }
         // 查询后台评论集合
-        List<CommentBackDTO> commentBackDTOList = commentDao.listCommentBackDTO(PageUtils.getLimitCurrent(), PageUtils.getSize(), condition);
+        List<CommentBackDTO> commentBackDTOList = commentMapper.listCommentBackDTO(PageUtils.getLimitCurrent(), PageUtils.getSize(), condition);
         return new PageResult<>(commentBackDTOList, count);
     }
 
@@ -196,10 +196,10 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             userId = comment.getReplyUserId();
         } else {
             if (Objects.requireNonNull(CommentTypeEnum.getCommentEnum(comment.getType())) == CommentTypeEnum.ARTICLE) {
-                userId = articleDao.selectById(comment.getTopicId()).getUserId();
+                userId = articleMapper.selectById(comment.getTopicId()).getUserId();
             }
         }
-        String email = userInfoDao.selectById(userId).getEmail();
+        String email = userInfoMapper.selectById(userId).getEmail();
         if (StringUtils.isNotBlank(email)) {
             // 发送消息
             EmailDTO emailDTO = new EmailDTO();
@@ -212,7 +212,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 emailDTO.setContent("您收到了一条新的回复，请前往" + url + "\n页面查看");
             } else {
                 // 管理员审核提醒
-                String adminEmail = userInfoDao.selectById(CommonConst.BLOGGER_ID).getEmail();
+                String adminEmail = userInfoMapper.selectById(CommonConst.BLOGGER_ID).getEmail();
                 emailDTO.setEmail(adminEmail);
                 emailDTO.setSubject("审核提醒");
                 emailDTO.setContent("您收到了一条新的回复，请前往后台管理页面审核");

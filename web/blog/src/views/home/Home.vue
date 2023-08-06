@@ -21,7 +21,7 @@
       <div class="sider-card">
         <!--图床弹窗-->
         <div>
-          <a-modal v-model:visible="state.visible" title="芒果图床🍋" centered>
+          <a-modal v-model:visible="state.visible" title="Wind图床🍋" centered>
             <a-input v-model:value="state.uploadCode" placeholder="输入上传码">
               <template #prefix>
                 <gift-filled />
@@ -185,7 +185,7 @@ const beforeUpload = (file: any) => {
   if (!isPNG) {
     message.error("只允许图片文件");
   }
-  if (state.uploadCode != "123789") {
+  if (state.uploadCode != "november") {
     message.error("请输入上传码");
     return false
   }

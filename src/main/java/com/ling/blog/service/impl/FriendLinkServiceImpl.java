@@ -29,12 +29,12 @@ import java.util.List;
 @Service
 public class FriendLinkServiceImpl extends ServiceImpl<FriendLinkMapper, FriendLink> implements FriendLinkService {
     @Autowired
-    private FriendLinkMapper friendLinkDao;
+    private FriendLinkMapper friendLinkMapper;
 
     @Override
     public List<FriendLinkDTO> listFriendLinks() {
         // 查询友链列表
-        List<FriendLink> friendLinkList = friendLinkDao.selectList(null);
+        List<FriendLink> friendLinkList = friendLinkMapper.selectList(null);
         return BeanCopyUtils.copyList(friendLinkList, FriendLinkDTO.class);
     }
 
@@ -42,7 +42,7 @@ public class FriendLinkServiceImpl extends ServiceImpl<FriendLinkMapper, FriendL
     public PageResult<FriendLinkBackDTO> listFriendLinkDTO(ConditionVO condition) {
         // 分页查询友链列表
         Page<FriendLink> page = new Page<>(PageUtils.getCurrent(), PageUtils.getSize());
-        Page<FriendLink> friendLinkPage = friendLinkDao.selectPage(page, new LambdaQueryWrapper<FriendLink>()
+        Page<FriendLink> friendLinkPage = friendLinkMapper.selectPage(page, new LambdaQueryWrapper<FriendLink>()
                 .like(StringUtils.isNotBlank(condition.getKeywords()), FriendLink::getLinkName, condition.getKeywords()));
         // 转换DTO
         List<FriendLinkBackDTO> friendLinkBackDTOList = BeanCopyUtils.copyList(friendLinkPage.getRecords(), FriendLinkBackDTO.class);
@@ -53,7 +53,7 @@ public class FriendLinkServiceImpl extends ServiceImpl<FriendLinkMapper, FriendL
     public PageResult<FriendLinkBackDTO> listFriendLinkUnCheck(ConditionVO condition) {
         // 分页查询友链列表
         Page<FriendLink> page = new Page<>(PageUtils.getCurrent(), PageUtils.getSize());
-        Page<FriendLink> friendLinkPage = friendLinkDao.selectPage(page, new LambdaQueryWrapper<FriendLink>().eq(FriendLink::getStatus,0)
+        Page<FriendLink> friendLinkPage = friendLinkMapper.selectPage(page, new LambdaQueryWrapper<FriendLink>().eq(FriendLink::getStatus,0)
                 .like(StringUtils.isNotBlank(condition.getKeywords()), FriendLink::getLinkName, condition.getKeywords()));
         // 转换DTO
         List<FriendLinkBackDTO> friendLinkBackDTOList = BeanCopyUtils.copyList(friendLinkPage.getRecords(), FriendLinkBackDTO.class);

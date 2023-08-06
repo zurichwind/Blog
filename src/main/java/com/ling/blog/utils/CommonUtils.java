@@ -1,5 +1,6 @@
 package com.ling.blog.utils;
 
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,6 +12,9 @@ import java.util.regex.Pattern;
  * @create 2023/5/27 17:26
  */
 public class CommonUtils {
+
+
+
 
     /**
      * 检测邮箱是否合法
@@ -87,6 +91,7 @@ public class CommonUtils {
         }
         return result;
     }
+
 
 
 }

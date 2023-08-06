@@ -18,6 +18,7 @@ export default defineConfig({
   ],
   server: {
     port: 4000, //启动端口
+    host: '0.0.0.0',
     proxy: {
       "/api": {
         //对/api开头的请求才进行跨域

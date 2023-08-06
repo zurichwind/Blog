@@ -39,20 +39,20 @@ import java.util.stream.Collectors;
 @Service
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
     @Autowired
-    private RoleMapper roleDao;
+    private RoleMapper roleMapper;
     @Autowired
     private RoleResourceService roleResourceService;
     @Autowired
     private RoleMenuService roleMenuService;
     @Autowired
-    private UserRoleMapper userRoleDao;
+    private UserRoleMapper userroleMapper;
     @Autowired
     private FilterInvocationSecurityMetadataSourceImpl filterInvocationSecurityMetadataSource;
 
     @Override
     public List<UserRoleDTO> listUserRoles() {
         // 查询角色列表
-        List<Role> roleList = roleDao.selectList(new LambdaQueryWrapper<Role>()
+        List<Role> roleList = roleMapper.selectList(new LambdaQueryWrapper<Role>()
                 .select(Role::getId, Role::getRoleName));
         return BeanCopyUtils.copyList(roleList, UserRoleDTO.class);
     }
@@ -60,9 +60,9 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     public PageResult<RoleDTO> listRoles(ConditionVO conditionVO) {
         // 查询角色列表
-        List<RoleDTO> roleDTOList = roleDao.listRoles(PageUtils.getLimitCurrent(), PageUtils.getSize(), conditionVO);
+        List<RoleDTO> roleDTOList = roleMapper.listRoles(PageUtils.getLimitCurrent(), PageUtils.getSize(), conditionVO);
         // 查询总量
-        Integer count = Math.toIntExact(roleDao.selectCount(new LambdaQueryWrapper<Role>()
+        Integer count = Math.toIntExact(roleMapper.selectCount(new LambdaQueryWrapper<Role>()
                 .like(StringUtils.isNotBlank(conditionVO.getKeywords()), Role::getRoleName, conditionVO.getKeywords())));
         return new PageResult<>(roleDTOList, count);
     }
@@ -71,7 +71,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     public void saveOrUpdateRole(RoleVO roleVO) {
         // 判断角色名重复
-        Role existRole = roleDao.selectOne(new LambdaQueryWrapper<Role>()
+        Role existRole = roleMapper.selectOne(new LambdaQueryWrapper<Role>()
                 .select(Role::getId)
                 .eq(Role::getRoleName, roleVO.getRoleName()));
         if (Objects.nonNull(existRole) && !existRole.getId().equals(roleVO.getId())) {
@@ -119,12 +119,12 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     public void deleteRoles(List<Integer> roleIdList) {
         // 判断角色下是否有用户
-        Integer count = Math.toIntExact(userRoleDao.selectCount(new LambdaQueryWrapper<UserRole>()
+        Integer count = Math.toIntExact(userroleMapper.selectCount(new LambdaQueryWrapper<UserRole>()
                 .in(UserRole::getRoleId, roleIdList)));
         if (count > 0) {
             throw new BizException("该角色下存在用户");
         }
-        roleDao.deleteBatchIds(roleIdList);
+        roleMapper.deleteBatchIds(roleIdList);
     }
 
 }

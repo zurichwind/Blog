@@ -5,8 +5,8 @@ import com.ling.blog.dto.CategoryBackDTO;
 import com.ling.blog.dto.CategoryDTO;
 import com.ling.blog.entity.Category;
 import com.ling.blog.vo.ConditionVO;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import java.util.List;
  * @Author : 风间离
  * @create 2023/5/27 18:43
  */
-@Repository
+@Mapper
 public interface CategoryMapper extends BaseMapper<Category> {
 
     /**

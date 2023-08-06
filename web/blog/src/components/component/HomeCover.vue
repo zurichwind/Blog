@@ -16,7 +16,8 @@ import Typewriter from "../tool/Typewriter.vue";
 import { DownOutlined } from "@ant-design/icons-vue";
 import { useStore } from "@/store";
 const pinia = useStore()
-const defaultUrl = ref("https://upload.linkstarted.top/config/690cd550b6f59b2613974a3804a01d42.jpg")
+const defaultUrl = ref("https://cloud.zurish.cn/images/cloud.jpg")
+
 let coverStyle = reactive({
   background: `url(${pinia.blogInfo.websiteConfig.websiteCover || defaultUrl.value})`,
   backgroundSize: "cover",

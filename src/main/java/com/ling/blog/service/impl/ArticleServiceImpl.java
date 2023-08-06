@@ -51,15 +51,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
     @Autowired
-    private ArticleMapper articleDao;
+    private ArticleMapper articleMapper;
     @Autowired
-    private CategoryMapper categoryDao;
+    private CategoryMapper categoryMapper;
     @Autowired
-    private TagMapper tagDao;
+    private TagMapper tagMapper;
     @Autowired(required = false)
     private TagService tagService;
     @Autowired
-    private ArticleTagMapper articleTagDao;
+    private ArticleTagMapper articletagMapper;
     @Autowired
     private SearchStrategyContext searchStrategyContext;
     @Autowired
@@ -77,7 +77,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     public PageResult<ArchiveDTO> listArchives() {
         Page<Article> page = new Page<>(PageUtils.getCurrent(), PageUtils.getSize());
         // 获取分页数据
-        Page<Article> articlePage = articleDao.selectPage(page, new LambdaQueryWrapper<Article>()
+        Page<Article> articlePage = articleMapper.selectPage(page, new LambdaQueryWrapper<Article>()
                 .select(Article::getId, Article::getArticleTitle, Article::getCreateTime).orderByDesc(Article::getCreateTime)
                 .eq(Article::getIsDelete, CommonConst.FALSE)
                 .eq(Article::getStatus, ArticleStatusEnum.PUBLIC.getStatus()));
@@ -88,12 +88,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public PageResult<ArticleBackDTO> listArticleBacks(ConditionVO condition) {
         // 查询文章总量
-        Integer count = articleDao.countArticleBacks(condition);
+        Integer count = articleMapper.countArticleBacks(condition);
         if (count == 0) {
             return new PageResult<>();
         }
         // 查询后台文章
-        List<ArticleBackDTO> articleBackDTOList = articleDao.listArticleBacks(PageUtils.getLimitCurrent(), PageUtils.getSize(), condition);
+        List<ArticleBackDTO> articleBackDTOList = articleMapper.listArticleBacks(PageUtils.getLimitCurrent(), PageUtils.getSize(), condition);
         // 查询文章点赞量和浏览量
         Map<Object, Double> viewsCountMap = redisService.zAllScore(RedisPrefixConst.ARTICLE_VIEWS_COUNT);
         Map<String, Object> likeCountMap = redisService.hGetAll(RedisPrefixConst.ARTICLE_LIKE_COUNT);
@@ -110,17 +110,17 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Override
     public List<ArticleHomeDTO> listArticles(ConditionVO condition) {
-        return articleDao.listArticles(PageUtils.getLimitCurrent(), PageUtils.getSize(),condition);
+        return articleMapper.listArticles(PageUtils.getLimitCurrent(), PageUtils.getSize(),condition);
     }
 
     @Override
     public ArticlePreviewListDTO listArticlesByCondition(ConditionVO condition) {
         // 查询文章
-        List<ArticlePreviewDTO> articlePreviewDTOList = articleDao.listArticlesByCondition(PageUtils.getLimitCurrent(), PageUtils.getSize(), condition);
+        List<ArticlePreviewDTO> articlePreviewDTOList = articleMapper.listArticlesByCondition(PageUtils.getLimitCurrent(), PageUtils.getSize(), condition);
         // 搜索条件对应名(标签或分类名)
         String name;
         if (Objects.nonNull(condition.getCategoryId())) {
-            name = categoryDao.selectOne(new LambdaQueryWrapper<Category>().select(Category::getCategoryName)
+            name = categoryMapper.selectOne(new LambdaQueryWrapper<Category>().select(Category::getCategoryName)
                     .eq(Category::getId, condition.getCategoryId())).getCategoryName();
         } else {
             name = tagService.getOne(new LambdaQueryWrapper<Tag>()
@@ -134,28 +134,28 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public ArticleDTO getArticleById(Integer articleId) {
         // 查询推荐文章
-        CompletableFuture<List<ArticleRecommendDTO>> recommendArticleList = CompletableFuture.supplyAsync(() -> articleDao.listRecommendArticles(articleId));
+        CompletableFuture<List<ArticleRecommendDTO>> recommendArticleList = CompletableFuture.supplyAsync(() -> articleMapper.listRecommendArticles(articleId));
         // 查询最新文章
         CompletableFuture<List<ArticleRecommendDTO>> newestArticleList = CompletableFuture.supplyAsync(() -> {
-            List<Article> articleList = articleDao.selectList(new LambdaQueryWrapper<Article>()
+            List<Article> articleList = articleMapper.selectList(new LambdaQueryWrapper<Article>()
                     .select(Article::getId, Article::getArticleTitle, Article::getArticleCover, Article::getCreateTime).eq(Article::getIsDelete, CommonConst.FALSE)
                     .eq(Article::getStatus, ArticleStatusEnum.PUBLIC.getStatus()).orderByDesc(Article::getId).last("limit 5"));
             return BeanCopyUtils.copyList(articleList, ArticleRecommendDTO.class);
         });
         // 查询id对应文章
-        ArticleDTO article = articleDao.getArticleById(articleId);
+        ArticleDTO article = articleMapper.getArticleById(articleId);
         if (Objects.isNull(article)) {
             throw new BizException("文章不存在");
         }
         // 更新文章浏览量
         updateArticleViewsCount(articleId);
         // 查询上一篇下一篇文章
-        Article lastArticle = articleDao.selectOne(new LambdaQueryWrapper<Article>()
+        Article lastArticle = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .select(Article::getId, Article::getArticleTitle, Article::getArticleCover).eq(Article::getIsDelete, CommonConst.FALSE)
                 .eq(Article::getStatus, ArticleStatusEnum.PUBLIC.getStatus())
                 .lt(Article::getId, articleId)
                 .orderByDesc(Article::getId).last("limit 1"));
-        Article nextArticle = articleDao.selectOne(new LambdaQueryWrapper<Article>()
+        Article nextArticle = articleMapper.selectOne(new LambdaQueryWrapper<Article>()
                 .select(Article::getId, Article::getArticleTitle, Article::getArticleCover).eq(Article::getIsDelete, CommonConst.FALSE)
                 .eq(Article::getStatus, ArticleStatusEnum.PUBLIC.getStatus())
                 .gt(Article::getId, articleId).orderByAsc(Article::getId)
@@ -188,19 +188,19 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             redisService.sRemove(articleLikeKey, articleId);
             // 文章点赞量-1
             redisService.hDecr(RedisPrefixConst.ARTICLE_LIKE_COUNT, articleId.toString(), 1L);
-            Article article =  articleDao.selectById(articleId);
+            Article article =  articleMapper.selectById(articleId);
             if (article.getLikeCount()!=0){
                 article.setLikeCount(article.getLikeCount()-1);
-                articleDao.updateById(article);
+                articleMapper.updateById(article);
             }
         } else {
             // 未点赞则增加文章id
             redisService.sAdd(articleLikeKey, articleId);
             // 文章点赞量+1
             redisService.hIncr(RedisPrefixConst.ARTICLE_LIKE_COUNT, articleId.toString(), 1L);
-            Article article =  articleDao.selectById(articleId);
+            Article article =  articleMapper.selectById(articleId);
             article.setLikeCount(article.getLikeCount()+1);
-            articleDao.updateById(article);
+            articleMapper.updateById(article);
         }
     }
 
@@ -239,10 +239,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
      */
     private Category saveArticleCategory(ArticleVO articleVO) {
         // 判断分类是否存在
-        Category category = categoryDao.selectOne(new LambdaQueryWrapper<Category>().eq(Category::getCategoryName, articleVO.getCategoryName()));
+        Category category = categoryMapper.selectOne(new LambdaQueryWrapper<Category>().eq(Category::getCategoryName, articleVO.getCategoryName()));
         if (Objects.isNull(category) && !articleVO.getStatus().equals(ArticleStatusEnum.DRAFT.getStatus())) {
             category = Category.builder().categoryName(articleVO.getCategoryName()).build();
-            categoryDao.insert(category);
+            categoryMapper.insert(category);
         }
         return category;
     }
@@ -251,7 +251,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     public void updateArticleTop(ArticleTopVO articleTopVO) {
         // 修改文章置顶状态
         Article article = Article.builder().id(articleTopVO.getId()).isTop(articleTopVO.getIsTop()).build();
-        articleDao.updateById(article);
+        articleMapper.updateById(article);
     }
 
     @Override
@@ -270,15 +270,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public void deleteArticles(List<Integer> articleIdList) {
         // 删除文章标签关联
-        articleTagDao.delete(new LambdaQueryWrapper<ArticleTag>().in(ArticleTag::getArticleId, articleIdList));
+        articletagMapper.delete(new LambdaQueryWrapper<ArticleTag>().in(ArticleTag::getArticleId, articleIdList));
         // 删除文章
-        articleDao.deleteBatchIds(articleIdList);
+        articleMapper.deleteBatchIds(articleIdList);
     }
 
     @Override
     public List<String> exportArticles(List<Integer> articleIdList) {
         // 查询文章信息
-        List<Article> articleList = articleDao.selectList(new LambdaQueryWrapper<Article>()
+        List<Article> articleList = articleMapper.selectList(new LambdaQueryWrapper<Article>()
                 .select(Article::getArticleTitle, Article::getArticleContent)
                 .in(Article::getId, articleIdList));
         // 写入文件并上传
@@ -303,15 +303,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     @Override
     public ArticleVO getArticleBackById(Integer articleId) {
         // 查询文章信息
-        Article article = articleDao.selectById(articleId);
+        Article article = articleMapper.selectById(articleId);
         // 查询文章分类
-        Category category = categoryDao.selectById(article.getCategoryId());
+        Category category = categoryMapper.selectById(article.getCategoryId());
         String categoryName = null;
         if (Objects.nonNull(category)) {
             categoryName = category.getCategoryName();
         }
         // 查询文章标签
-        List<String> tagNameList = tagDao.listTagNameByArticleId(articleId);
+        List<String> tagNameList = tagMapper.listTagNameByArticleId(articleId);
         // 封装数据
         ArticleVO articleVO = BeanCopyUtils.copyObject(article, ArticleVO.class);
         articleVO.setCategoryName(categoryName);
@@ -333,9 +333,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
             session.setAttribute(CommonConst.ARTICLE_SET, articleSet);
             // 浏览量+1
             redisService.zIncr(RedisPrefixConst.ARTICLE_VIEWS_COUNT, articleId, 1D);
-            Article article =  articleDao.selectById(articleId);
+            Article article =  articleMapper.selectById(articleId);
             article.setViewsCount(article.getViewsCount()+1);
-            articleDao.updateById(article);
+            articleMapper.updateById(article);
         }
     }
 
@@ -347,7 +347,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
     private void saveArticleTag(ArticleVO articleVO, Integer articleId) {
         // 编辑文章则删除文章所有标签
         if (Objects.nonNull(articleVO.getId())) {
-            articleTagDao.delete(new LambdaQueryWrapper<ArticleTag>().eq(ArticleTag::getArticleId, articleVO.getId()));
+            articletagMapper.delete(new LambdaQueryWrapper<ArticleTag>().eq(ArticleTag::getArticleId, articleVO.getId()));
         }
         // 添加文章标签
         List<String> tagNameList = articleVO.getTagNameList();

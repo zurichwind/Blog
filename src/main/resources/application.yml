@@ -43,18 +43,20 @@ spring:
           max-attempts: 3 #最大重试次数
           initial-interval: 3000 #重试间隔时间（单位毫秒）
   # 邮箱配置
+    #host: smtp.qq.com
   mail:
-    host: smtp.qq.com
-    username: 你的qq邮箱
-    password: 申请的密码
-    default-encoding: UTF-8
-    port: 587
+    host: smtp.exmail.qq.com
+    username: wind@zurish.cn
+    password: m3YSEY7ACEMSrSHE
+    default-encoding: utf-8
+    port: 465
     properties:
+      from: wind@qq.com
       mail:
-      smtp:
-      auth: true
-      socketFactory:
-      # class: javax.net.ssl.SSLSocketFactory
+        smtp:
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+        debug: true
   # 上传图片大小限制
   servlet:
     multipart:
@@ -64,6 +66,7 @@ spring:
     redis:
       host: 127.0.0.1
       port: 6379
+      #password: november
 
 # 配置MybatisPlus
 mybatis-plus:
@@ -73,17 +76,26 @@ mybatis-plus:
     map-underscore-to-camel-case: true
 
 # 搜索模式
-search:
-  mode: mysql
+#search:
+  #mode: mysql
 # 上传模式
+# 搜索模式 可选 elasticsearch、mysql
+search:
+  mode: elasticsearch
+# 文件上传策略 local、oss、cos
 upload:
-  mode: local
+  mode: oss
   local:
     # nginx映射本地文件路径，无域名则为 ip:83
-    #url: https://
-    url: 127.0.0.1:83
+    url: https://cloud.zurish.cn
     # 本地文件存储路径
-    path: /Wind/usr/local/blog/upload/
+    path: /usr/local/blog/upload/
+  oss:
+    url: https://cloud.zurish.cn/
+    endpoint: oss-cn-hangzhou.aliyuncs.com
+    bucketName: zurish
+    accessKeyId: LTAI5t7HwwpV1bacANzkpnVZ
+    accesskeySecret: HWUgh7jovFaLCq2OgMxmVgMFJ8PtSs
 
 # 网站前台域名（邮件通知用）
 website:
@@ -115,4 +127,4 @@ springdoc:
 knife4j:
   enable: true
   setting:
-    language: zh_cn
+    language: zh-CN
