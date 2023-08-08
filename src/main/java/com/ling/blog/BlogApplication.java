@@ -22,6 +22,9 @@ public class BlogApplication {
         return new RestTemplate();
     }
 
+
+
+
 }
 
 

@@ -29,14 +29,15 @@ import com.ling.blog.service.UserAuthService;
 import com.ling.blog.strategy.context.SocialLoginStrategyContext;
 import com.ling.blog.utils.CommonUtils;
 import com.ling.blog.utils.PageUtils;
-import com.ling.blog.utils.SendMailUtils;
 import com.ling.blog.utils.UserUtils;
 import com.ling.blog.vo.*;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailSender;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
@@ -72,8 +73,7 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
     @Autowired
     private SocialLoginStrategyContext socialLoginStrategyContext;
 
-    @Autowired
-    private SendMailUtils mailUtils;
+
     @Override
     public void sendCode(String username) {
         // 校验账号是否合法
@@ -89,7 +89,6 @@ public class UserAuthServiceImpl extends ServiceImpl<UserAuthMapper, UserAuth> i
                 .content("您的验证码为 " + code + " 有效期15分钟，请不要告诉他人哦！")
                 .build();
         log.info("验证码是" + code);
-        mailUtils.sendValidateEmail(username,code);
         rabbitTemplate.convertAndSend(MQPrefixConst.EMAIL_EXCHANGE, "*", new Message(JSON.toJSONBytes(emailDTO), new MessageProperties()));
         // 将验证码存入redis，设置过期时间为15分钟
         redisService.set(RedisPrefixConst.USER_CODE_KEY + username, code, RedisPrefixConst.CODE_EXPIRE_TIME);

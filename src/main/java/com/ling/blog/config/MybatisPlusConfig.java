@@ -15,10 +15,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @create 2023/5/27 16:57
  */
 
-@EnableTransactionManagement
+@EnableTransactionManagement //自动管理事务，默认是开启的
 @Configuration
 public class MybatisPlusConfig {
 
+    //注册自动分页插件
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();

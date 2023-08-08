@@ -297,6 +297,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
 
     @Override
     public List<ArticleSearchDTO> listArticlesBySearch(ConditionVO condition) {
+        log.info("Condition = " + condition);
         return searchStrategyContext.executeSearchStrategy(condition.getKeywords());
     }
 

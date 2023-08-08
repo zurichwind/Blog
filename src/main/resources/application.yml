@@ -29,7 +29,18 @@ spring:
       connection-timeout: 30000
       connection-test-query: SELECT 1
   # redis配置
-
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      #password: november
+  elasticsearch:
+    rest:
+      uris: 127.0.0.1:9200               #---ES的连接地址，多个地址用逗号分隔
+     # username: elastic                         #---用户名
+    # password: elastic                         #---密码
+      connection-timeout: 1000           #---连接超时时间(默认1s)
+      read-timeout: 1000
   # mq配置
   rabbitmq:
     host: 127.0.0.1
@@ -42,8 +53,8 @@ spring:
           enabled: true
           max-attempts: 3 #最大重试次数
           initial-interval: 3000 #重试间隔时间（单位毫秒）
-  # 邮箱配置
-    #host: smtp.qq.com
+# 邮箱配置
+#host: smtp.qq.com
   mail:
     host: smtp.exmail.qq.com
     username: wind@zurish.cn
@@ -62,12 +73,19 @@ spring:
     multipart:
       max-file-size: 100MB
       max-request-size:  100MB
-  data:
-    redis:
-      host: 127.0.0.1
-      port: 6379
-      #password: november
 
+  # elasticsearch配置
+elasticsearch:
+  rest:
+    uris: http://127.0.0.1:9200
+  username: #elastic
+  password: #elastic
+  hostname: localhost
+  port: 9200
+  scheme: http
+  connTimeout: 1000
+  socketTimeout: 30000
+  connectionRequestTimeout: 5000
 # 配置MybatisPlus
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -81,7 +99,7 @@ mybatis-plus:
 # 上传模式
 # 搜索模式 可选 elasticsearch、mysql
 search:
-  mode: elasticsearch
+  mode: mysql
 # 文件上传策略 local、oss、cos
 upload:
   mode: oss
@@ -94,8 +112,8 @@ upload:
     url: https://cloud.zurish.cn/
     endpoint: oss-cn-hangzhou.aliyuncs.com
     bucketName: zurish
-    accessKeyId: LTAI5t7HwwpV1bacANzkpnVZ
-    accesskeySecret: HWUgh7jovFaLCq2OgMxmVgMFJ8PtSs
+    accessKeyId:
+    accesskeySecret:
 
 # 网站前台域名（邮件通知用）
 website:
@@ -108,8 +126,8 @@ qq:
   user-info-url: https://graph.qq.com/user/get_user_info?openid={openid}&access_token={access_token}&oauth_consumer_key={oauth_consumer_key}
 
 wx:
-  appid: 申请的微信的app-id
-  secret: 申请微信的的秘钥
+  appid: wx18d3679a25f2a036
+  secret: 6768016f5b4e2ed343d37a91535c0505
   grantType: authorization_code
 
 springdoc:

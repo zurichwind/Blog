@@ -1,4 +1,4 @@
-package com.ling.blog.strategy.impl;
+package com.ling.blog;
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.ling.blog.constant.CommonConst.*;
-import static com.ling.blog.constant.CommonConst.POST_TAG;
-import static com.ling.blog.constant.CommonConst.PRE_TAG;
+import static com.ling.blog.constant.CommonConst.FALSE;
 import static com.ling.blog.constant.ElasticConstant.*;
 import static com.ling.blog.enums.ArticleStatusEnum.PUBLIC;
 
@@ -36,15 +34,14 @@ import static com.ling.blog.enums.ArticleStatusEnum.PUBLIC;
  * @author ican
  */
 @Slf4j
-@Service("esSearchStrategyImpl")
+//@Service("esSearchStrategyImpl")
 public class EsSearchStrategyImpl implements SearchStrategy {
 
-    @Autowired
+    //@Autowired
     private ElasticsearchClient elasticsearchClient;
 
     @Override
     public List<ArticleSearchDTO> searchArticle(String keyword) {
-        log.info("keywords = " + keyword);
         if (StringUtils.isBlank(keyword)) {
             return new ArrayList<>();
         }
@@ -61,12 +58,8 @@ public class EsSearchStrategyImpl implements SearchStrategy {
                             .fields(ARTICLE_CONTENT, f -> f.preTags(PRE_TAG).postTags(POST_TAG))
                             .requireFieldMatch(false)
                     ));
-            log.info("searchRequest="+searchRequest);
-            log.info("ARTICLE_INDEX = " + ARTICLE_INDEX);
             SearchResponse<ArticleSearchDTO> search = elasticsearchClient.search(searchRequest, ArticleSearchDTO.class);
             // 解析结果
-            log.info("search = " + search);
-            log.info(handleResponse(search).toString());
             return handleResponse(search);
         } catch (Exception e) {
             log.error(e.getMessage());
