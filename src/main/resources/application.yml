@@ -58,7 +58,7 @@ spring:
   mail:
     host: smtp.exmail.qq.com
     username: wind@zurish.cn
-    password: m3YSEY7ACEMSrSHE
+    password: 
     default-encoding: utf-8
     port: 465
     properties:
@@ -126,8 +126,8 @@ qq:
   user-info-url: https://graph.qq.com/user/get_user_info?openid={openid}&access_token={access_token}&oauth_consumer_key={oauth_consumer_key}
 
 wx:
-  appid: wx18d3679a25f2a036
-  secret: 6768016f5b4e2ed343d37a91535c0505
+  appid: 
+  secret: 
   grantType: authorization_code
 
 springdoc:
